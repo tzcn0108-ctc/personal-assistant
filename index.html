@@ -218,6 +218,35 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
 
   <!-- ADD -->
   <div class="section" id="sec-add">
+
+    <!-- AI EXTRACT -->
+    <div class="add-card fade-in" style="border-color:rgba(74,143,255,0.2);margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="width:36px;height:36px;background:rgba(74,143,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🤖</div>
+        <div>
+          <div style="font-size:0.92rem;font-weight:600;color:var(--blue)">AI 智能提取任務</div>
+          <div style="font-size:0.7rem;color:var(--dim)">貼上電郵內容，自動分析任務</div>
+        </div>
+      </div>
+      <label class="field-label">貼上電郵 / 訊息內容</label>
+      <textarea class="field-input" id="ai-input" placeholder="將電郵或任何文字貼入呢度，AI會自動提取任務..." style="height:120px;resize:none;margin-bottom:12px;"></textarea>
+      <button class="submit-btn" id="ai-btn" onclick="aiExtract()" style="background:linear-gradient(135deg,var(--blue),#2060cc);">
+        🤖 AI 分析並提取任務
+      </button>
+      <div id="ai-result" style="margin-top:14px;display:none;">
+        <div style="font-size:0.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">AI 提取結果</div>
+        <div id="ai-tasks-preview"></div>
+        <button class="submit-btn" onclick="confirmAiTasks()" style="margin-top:10px;">✅ 確認加入所有任務</button>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 12px;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <div style="font-size:0.7rem;color:var(--dim);">或者手動輸入</div>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+
+    <!-- MANUAL -->
     <div class="add-card fade-in">
       <label class="field-label">任務名稱</label>
       <input class="field-input" id="f-title" placeholder="例：回覆 UCL programme director 電郵">
@@ -544,6 +573,119 @@ window.go = function(name){
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',sections[i]===name));
   if(name==='today') renderToday();
   if(name==='schedule') renderSchedule();
+};
+
+// ── GEMINI AI EXTRACT ──
+const GEMINI_KEY = 'AIzaSyA_L3SMs6wE2aTDxWIlKFrkvG3uESIXIqw';
+let aiTasksBuffer = [];
+
+window.aiExtract = async function(){
+  const text = document.getElementById('ai-input').value.trim();
+  if(!text){ showToast('請先貼上電郵內容！'); return; }
+
+  const btn = document.getElementById('ai-btn');
+  btn.textContent = '🤖 AI 分析中...';
+  btn.disabled = true;
+  document.getElementById('ai-result').style.display = 'none';
+
+  const prompt = `你係一個個人助手。請從以下文字中提取所有需要行動的任務。
+用JSON格式回覆，只回覆JSON，唔好其他文字。
+
+格式：
+[
+  {
+    "title": "任務名稱（廣東話，簡潔）",
+    "cat": "work/fruits/family/church/health 其中一個",
+    "priority": "high/med/low 其中一個",
+    "note": "簡短備注（可空白）"
+  }
+]
+
+cat判斷標準：
+- work = UCL、GBSH、會議、電郵、報告、同事
+- fruits = JP Fruits、水果、訂單、送貨
+- family = 家庭、小朋友、太太、學校
+- church = 教會、崇拜
+- health = 健身、醫生、健康
+
+文字內容：
+${text}`;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+    });
+    const data = await res.json();
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    aiTasksBuffer = JSON.parse(clean);
+
+    if(!aiTasksBuffer.length){
+      showToast('AI搵唔到任何任務，試吓貼多啲內容');
+      btn.textContent = '🤖 AI 分析並提取任務';
+      btn.disabled = false;
+      return;
+    }
+
+    // Show preview
+    const preview = document.getElementById('ai-tasks-preview');
+    preview.innerHTML = aiTasksBuffer.map((t,i)=>{
+      const cc = catCfg[t.cat]||catCfg.work;
+      const pc = priCfg[t.priority]||priCfg.med;
+      return `<div class="task-item cat-${t.cat}" style="margin-bottom:8px;cursor:default;">
+        <div class="task-check" style="border-color:var(--blue);color:var(--blue);font-size:0.8rem;">${i+1}</div>
+        <div class="task-content">
+          <div class="task-title">${t.title}</div>
+          <div class="task-meta">
+            <span class="task-cat">${cc.icon} ${cc.label}</span>
+            ${t.note?`<span style="font-size:0.65rem;color:var(--dim)">· ${t.note}</span>`:''}
+          </div>
+        </div>
+        <div class="task-pri ${pc.dot}"></div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('ai-result').style.display = 'block';
+    showToast(`🤖 AI 提取咗 ${aiTasksBuffer.length} 個任務！`);
+  } catch(e){
+    showToast('⚠️ AI分析失敗：'+e.message);
+  }
+
+  btn.textContent = '🤖 AI 分析並提取任務';
+  btn.disabled = false;
+};
+
+window.confirmAiTasks = async function(){
+  if(!aiTasksBuffer.length) return;
+  setSyncStatus('syncing');
+  try {
+    for(const t of aiTasksBuffer){
+      const newTask = {
+        title: t.title,
+        cat: t.cat||'work',
+        priority: t.priority||'med',
+        time: '',
+        note: t.note||'',
+        done: false,
+        date: todayKey(),
+        created: new Date().toISOString(),
+      };
+      const ref = await addDoc(collection(db,'tasks'), newTask);
+      tasks.unshift({id:ref.id,...newTask});
+    }
+    aiTasksBuffer = [];
+    document.getElementById('ai-input').value = '';
+    document.getElementById('ai-result').style.display = 'none';
+    setSyncStatus('online');
+    renderToday();
+    go('today');
+    showToast('✅ 所有AI任務已加入並同步！');
+  } catch(e){
+    setSyncStatus('');
+    showToast('⚠️ 同步失敗：'+e.message);
+  }
 };
 
 // ── INIT ──
