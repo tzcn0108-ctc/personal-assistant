@@ -7,347 +7,166 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Sans+HK:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:       #080b12;
-  --s1:       #0e1320;
-  --s2:       #141928;
-  --s3:       #1c2235;
-  --border:   rgba(255,255,255,0.07);
-  --gold:     #c9962a;
-  --gold-lt:  #f0c060;
-  --blue:     #4a8fff;
-  --green:    #3ec98e;
-  --red:      #ff5f5f;
-  --purple:   #a97ff0;
-  --text:     #eef0f8;
-  --dim:      #5a6080;
-  --dim2:     #3a4060;
+  --bg:#080b12; --s1:#0e1320; --s2:#141928; --s3:#1c2235;
+  --border:rgba(255,255,255,0.07);
+  --gold:#c9962a; --gold-lt:#f0c060;
+  --blue:#4a8fff; --green:#3ec98e; --red:#ff5f5f; --purple:#a97ff0;
+  --text:#eef0f8; --dim:#5a6080; --dim2:#3a4060;
 }
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans HK',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+.orb{position:fixed;border-radius:50%;pointer-events:none;filter:blur(80px);opacity:0.12;}
+.orb1{width:400px;height:400px;background:var(--blue);top:-100px;right:-100px;}
+.orb2{width:300px;height:300px;background:var(--gold);bottom:100px;left:-80px;}
+.orb3{width:200px;height:200px;background:var(--purple);top:50%;left:40%;}
+.app{max-width:430px;margin:0 auto;padding-bottom:90px;position:relative;z-index:1;}
 
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+/* HEADER */
+.header{padding:48px 24px 24px;}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.greeting-name{font-family:'Playfair Display',serif;font-size:2rem;line-height:1.1;background:linear-gradient(135deg,var(--gold-lt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.greeting-sub{font-size:0.78rem;color:var(--dim);margin-top:4px;letter-spacing:0.05em;}
+.clock-badge{text-align:right;background:var(--s2);border:1px solid var(--border);border-radius:14px;padding:10px 16px;}
+.clock-time{font-size:1.3rem;font-weight:700;font-family:'Playfair Display',serif;color:var(--text);letter-spacing:0.04em;}
+.clock-date{font-size:0.65rem;color:var(--dim);margin-top:2px;}
 
-body {
-  font-family: 'Noto Sans HK', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* SYNC STATUS */
+.sync-bar{margin:0 24px 16px;display:flex;align-items:center;gap:8px;font-size:0.72rem;color:var(--dim);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);}
+.sync-dot.online{background:var(--green);box-shadow:0 0 6px var(--green);}
+.sync-dot.syncing{background:var(--gold);animation:pulse 1s infinite;}
 
-/* Noise texture overlay */
-body::after {
-  content:'';
-  position:fixed; inset:0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none; z-index:9999; opacity:0.4;
-}
+/* PROGRESS */
+.progress-strip{margin:0 24px 24px;background:var(--s2);border:1px solid var(--border);border-radius:18px;padding:16px 20px;}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.progress-label{font-size:0.72rem;color:var(--dim);letter-spacing:0.08em;text-transform:uppercase;}
+.progress-pct{font-size:0.85rem;font-weight:700;color:var(--gold-lt);}
+.progress-bar-bg{height:5px;background:var(--s3);border-radius:99px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));border-radius:99px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+.progress-cats{display:flex;gap:16px;margin-top:12px;}
+.pcat{display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--dim);}
+.pcat-dot{width:6px;height:6px;border-radius:50%;}
 
-/* Glow orbs */
-.orb {
-  position:fixed; border-radius:50%; pointer-events:none; filter:blur(80px); opacity:0.12;
-}
-.orb1 { width:400px; height:400px; background:var(--blue);  top:-100px; right:-100px; }
-.orb2 { width:300px; height:300px; background:var(--gold);  bottom:100px; left:-80px; }
-.orb3 { width:200px; height:200px; background:var(--purple); top:50%; left:40%; }
+/* TABS */
+.tabs{display:flex;padding:0 24px;gap:6px;margin-bottom:20px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:8px 18px;border-radius:99px;font-size:0.75rem;font-weight:500;letter-spacing:0.03em;border:1px solid var(--border);background:transparent;color:var(--dim);cursor:pointer;transition:all 0.2s;}
+.tab.active{background:linear-gradient(135deg,var(--gold),#a07020);color:#0a0800;border-color:transparent;font-weight:700;}
 
-.app { max-width:430px; margin:0 auto; padding-bottom:90px; position:relative; z-index:1; }
+/* SECTIONS */
+.section{display:none;padding:0 24px;}
+.section.active{display:block;}
 
-/* ── HEADER ── */
-.header {
-  padding: 48px 24px 24px;
-  position: relative;
-}
-.header-top { display:flex; justify-content:space-between; align-items:flex-start; }
-.greeting-name {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  line-height: 1.1;
-  background: linear-gradient(135deg, var(--gold-lt), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.greeting-sub { font-size:0.78rem; color:var(--dim); margin-top:4px; letter-spacing:0.05em; }
+/* TODAY HERO */
+.today-hero{background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.today-hero::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,150,42,0.15),transparent 70%);}
+.today-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-top:16px;}
+.tstat{background:var(--s1);padding:12px;text-align:center;}
+.tstat-num{font-size:1.4rem;font-weight:700;font-family:'Playfair Display',serif;}
+.tstat-lbl{font-size:0.62rem;color:var(--dim);margin-top:2px;}
+.n-blue{color:var(--blue);} .n-gold{color:var(--gold-lt);} .n-green{color:var(--green);}
 
-.clock-badge {
-  text-align:right;
-  background: var(--s2);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:10px 16px;
-}
-.clock-time { font-size:1.3rem; font-weight:700; font-family:'Playfair Display',serif; color:var(--text); letter-spacing:0.04em; }
-.clock-date { font-size:0.65rem; color:var(--dim); margin-top:2px; }
+/* TASK ITEMS */
+.task-group-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.12em;color:var(--dim);margin:16px 0 8px;font-weight:600;}
+.task-item{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.task-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.task-item.cat-work::before{background:var(--blue);}
+.task-item.cat-fruits::before{background:var(--gold);}
+.task-item.cat-family::before{background:var(--green);}
+.task-item.cat-church::before{background:var(--purple);}
+.task-item.cat-health::before{background:var(--red);}
+.task-item.done{opacity:0.4;}
+.task-item.done .task-title{text-decoration:line-through;}
+.task-check{width:22px;height:22px;border-radius:7px;flex-shrink:0;border:1.5px solid var(--dim2);display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:all 0.2s;}
+.task-item.done .task-check{background:var(--green);border-color:var(--green);color:#fff;}
+.task-content{flex:1;min-width:0;}
+.task-title{font-size:0.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.task-meta{display:flex;align-items:center;gap:8px;margin-top:3px;}
+.task-cat{font-size:0.65rem;color:var(--dim);}
+.task-time{font-size:0.65rem;color:var(--gold);background:rgba(201,150,42,0.1);padding:1px 6px;border-radius:4px;}
+.task-pri{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pri-high{background:var(--red);box-shadow:0 0 6px var(--red);}
+.pri-med{background:var(--gold);}
+.pri-low{background:var(--green);}
+.del-task{font-size:0.7rem;padding:3px 8px;border-radius:6px;background:rgba(255,95,95,0.1);border:1px solid rgba(255,95,95,0.2);color:var(--red);cursor:pointer;flex-shrink:0;}
 
-/* ── PROGRESS STRIP ── */
-.progress-strip {
-  margin: 0 24px 24px;
-  background: var(--s2);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px 20px;
-}
-.progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-.progress-label { font-size:0.72rem; color:var(--dim); letter-spacing:0.08em; text-transform:uppercase; }
-.progress-pct { font-size:0.85rem; font-weight:700; color:var(--gold-lt); }
-.progress-bar-bg {
-  height:5px; background:var(--s3); border-radius:99px; overflow:hidden;
-}
-.progress-bar-fill {
-  height:100%;
-  background: linear-gradient(90deg, var(--gold), var(--gold-lt));
-  border-radius:99px;
-  transition: width 0.6s cubic-bezier(.4,0,.2,1);
-}
-.progress-cats { display:flex; gap:16px; margin-top:12px; }
-.pcat { display:flex; align-items:center; gap:5px; font-size:0.68rem; color:var(--dim); }
-.pcat-dot { width:6px; height:6px; border-radius:50%; }
+/* ADD FORM */
+.add-card{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:12px;}
+.field-label{font-size:0.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;display:block;}
+.field-input,.field-select{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:0.85rem;outline:none;transition:border-color 0.2s;margin-bottom:12px;}
+.field-input:focus,.field-select:focus{border-color:var(--gold);}
+.field-select option{background:var(--s2);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.submit-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#a07020);color:#080600;border:none;border-radius:14px;font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:opacity 0.2s,transform 0.1s;}
+.submit-btn:active{opacity:0.85;transform:scale(0.99);}
 
-/* ── TABS ── */
-.tabs {
-  display:flex; padding:0 24px; gap:6px; margin-bottom:20px;
-  overflow-x:auto; scrollbar-width:none;
-}
-.tabs::-webkit-scrollbar { display:none; }
-.tab {
-  flex-shrink:0; padding:8px 18px; border-radius:99px;
-  font-size:0.75rem; font-weight:500; letter-spacing:0.03em;
-  border:1px solid var(--border);
-  background:transparent; color:var(--dim);
-  cursor:pointer; transition:all 0.2s;
-}
-.tab.active {
-  background: linear-gradient(135deg, var(--gold), #a07020);
-  color:#0a0800; border-color:transparent; font-weight:700;
-}
+/* SCHEDULE */
+.week-day{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;}
+.wd-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.wd-day{font-size:0.75rem;font-weight:700;color:var(--gold-lt);letter-spacing:0.08em;}
+.wd-line{flex:1;height:1px;background:var(--border);}
+.wd-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;}
+.wd-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.wd-info{flex:1;}
+.wd-title{font-size:0.85rem;font-weight:500;}
+.wd-note{font-size:0.72rem;color:var(--dim);margin-top:1px;}
+.wd-time{font-size:0.68rem;color:var(--gold);background:rgba(201,150,42,0.1);padding:2px 7px;border-radius:5px;white-space:nowrap;}
 
-/* ── SECTIONS ── */
-.section { display:none; padding:0 24px; }
-.section.active { display:block; }
+/* WHATSAPP */
+.wa-outer{background:linear-gradient(160deg,#0d1f12,#0a1a10);border:1px solid rgba(62,201,142,0.15);border-radius:20px;padding:20px;margin-bottom:14px;}
+.wa-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.wa-ico{width:42px;height:42px;background:rgba(37,211,102,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
+.wa-ttl{font-size:1rem;font-weight:600;color:#3ec98e;}
+.wa-sub{font-size:0.7rem;color:var(--dim);margin-top:1px;}
+.wa-bubble{background:#0d2015;border-radius:0 14px 14px 14px;padding:14px 16px;font-size:0.8rem;line-height:1.7;color:#b8e8cc;white-space:pre-wrap;margin-bottom:14px;border:1px solid rgba(62,201,142,0.1);min-height:80px;}
+.wa-btn{width:100%;padding:12px;background:linear-gradient(135deg,#25d366,#1aa84d);color:#fff;border:none;border-radius:12px;font-family:inherit;font-size:0.88rem;font-weight:700;cursor:pointer;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:8px;}
 
-/* ── TODAY VIEW ── */
-.today-hero {
-  background: linear-gradient(135deg, var(--s2), var(--s3));
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:16px;
-  position:relative;
-  overflow:hidden;
-}
-.today-hero::before {
-  content:'';
-  position:absolute; top:-30px; right:-30px;
-  width:120px; height:120px; border-radius:50%;
-  background: radial-gradient(circle, rgba(201,150,42,0.15), transparent 70%);
-}
-.today-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--border); border-radius:12px; overflow:hidden; margin-top:16px; }
-.tstat { background:var(--s1); padding:12px; text-align:center; }
-.tstat-num { font-size:1.4rem; font-weight:700; font-family:'Playfair Display',serif; }
-.tstat-lbl { font-size:0.62rem; color:var(--dim); margin-top:2px; }
-.n-blue { color:var(--blue); }
-.n-gold { color:var(--gold-lt); }
-.n-green { color:var(--green); }
+/* REMINDER */
+.rem-item{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+.rem-ico{font-size:1.4rem;width:38px;text-align:center;}
+.rem-body{flex:1;}
+.rem-title{font-size:0.88rem;font-weight:500;}
+.rem-time{font-size:0.7rem;color:var(--dim);margin-top:2px;}
+.rem-badge{font-size:0.65rem;padding:3px 8px;border-radius:6px;font-weight:600;background:rgba(201,150,42,0.12);color:var(--gold-lt);}
 
-/* ── TASK ITEMS ── */
-.task-group-label {
-  font-size:0.65rem; text-transform:uppercase; letter-spacing:0.12em;
-  color:var(--dim); margin:16px 0 8px; font-weight:600;
-}
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;}
+.empty-ico{font-size:3rem;margin-bottom:12px;opacity:0.4;}
+.empty-txt{font-size:0.82rem;color:var(--dim);line-height:1.6;}
 
-.task-item {
-  background:var(--s1);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:14px 16px;
-  margin-bottom:8px;
-  display:flex; align-items:center; gap:12px;
-  cursor:pointer;
-  transition:all 0.2s;
-  position:relative;
-  overflow:hidden;
-}
-.task-item::before {
-  content:'';
-  position:absolute; left:0; top:0; bottom:0; width:3px;
-  border-radius:3px 0 0 3px;
-  transition:opacity 0.2s;
-}
-.task-item.cat-work::before   { background:var(--blue); }
-.task-item.cat-fruits::before { background:var(--gold); }
-.task-item.cat-family::before { background:var(--green); }
-.task-item.cat-church::before { background:var(--purple); }
-.task-item.cat-health::before { background:var(--red); }
-.task-item.done { opacity:0.4; }
-.task-item.done .task-title { text-decoration:line-through; }
+/* LOADING */
+.loading{text-align:center;padding:40px 20px;color:var(--dim);font-size:0.85rem;}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;}
 
-.task-check {
-  width:22px; height:22px; border-radius:7px; flex-shrink:0;
-  border:1.5px solid var(--dim2);
-  display:flex; align-items:center; justify-content:center;
-  font-size:0.75rem; transition:all 0.2s;
-}
-.task-item.done .task-check { background:var(--green); border-color:var(--green); color:#fff; }
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(8,11,18,0.92);backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;z-index:200;padding:8px 0 20px;}
+.bni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 0;position:relative;}
+.bni-ico{font-size:1.25rem;transition:transform 0.2s;}
+.bni-lbl{font-size:0.6rem;color:var(--dim);transition:color 0.2s;}
+.bni.active .bni-lbl{color:var(--gold-lt);}
+.bni.active .bni-ico{transform:scale(1.15);}
+.bni.active::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--gold);border-radius:2px;}
 
-.task-content { flex:1; min-width:0; }
-.task-title { font-size:0.88rem; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.task-meta { display:flex; align-items:center; gap:8px; margin-top:3px; }
-.task-cat { font-size:0.65rem; color:var(--dim); }
-.task-time { font-size:0.65rem; color:var(--gold); background:rgba(201,150,42,0.1); padding:1px 6px; border-radius:4px; }
-
-.task-pri {
-  width:7px; height:7px; border-radius:50%; flex-shrink:0;
-}
-.pri-high { background:var(--red); box-shadow:0 0 6px var(--red); }
-.pri-med  { background:var(--gold); }
-.pri-low  { background:var(--green); }
-
-/* ── ADD FORM ── */
-.add-card {
-  background:var(--s1); border:1px solid var(--border);
-  border-radius:20px; padding:20px; margin-bottom:12px;
-}
-.field-label { font-size:0.68rem; color:var(--dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; display:block; }
-.field-input, .field-select {
-  width:100%; padding:11px 14px;
-  background:var(--s2); border:1px solid var(--border);
-  border-radius:12px; color:var(--text);
-  font-family:inherit; font-size:0.85rem; outline:none;
-  transition:border-color 0.2s; margin-bottom:12px;
-}
-.field-input:focus, .field-select:focus { border-color:var(--gold); }
-.field-select option { background:var(--s2); }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.submit-btn {
-  width:100%; padding:13px;
-  background: linear-gradient(135deg, var(--gold), #a07020);
-  color:#080600; border:none; border-radius:14px;
-  font-family:inherit; font-size:0.9rem; font-weight:700;
-  cursor:pointer; letter-spacing:0.03em;
-  transition:opacity 0.2s, transform 0.1s;
-}
-.submit-btn:active { opacity:0.85; transform:scale(0.99); }
-
-/* ── SCHEDULE ── */
-.week-day {
-  background:var(--s1); border:1px solid var(--border);
-  border-radius:16px; padding:16px; margin-bottom:10px;
-}
-.wd-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-.wd-day { font-size:0.75rem; font-weight:700; color:var(--gold-lt); letter-spacing:0.08em; }
-.wd-line { flex:1; height:1px; background:var(--border); }
-.wd-item { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
-.wd-dot { width:8px; height:8px; border-radius:50%; margin-top:4px; flex-shrink:0; }
-.wd-info { flex:1; }
-.wd-title { font-size:0.85rem; font-weight:500; }
-.wd-note { font-size:0.72rem; color:var(--dim); margin-top:1px; }
-.wd-time { font-size:0.68rem; color:var(--gold); background:rgba(201,150,42,0.1); padding:2px 7px; border-radius:5px; white-space:nowrap; }
-
-/* ── WHATSAPP ── */
-.wa-outer {
-  background:linear-gradient(160deg,#0d1f12,#0a1a10);
-  border:1px solid rgba(62,201,142,0.15);
-  border-radius:20px; padding:20px; margin-bottom:14px;
-}
-.wa-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
-.wa-ico { width:42px; height:42px; background:rgba(37,211,102,0.15); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; }
-.wa-ttl { font-size:1rem; font-weight:600; color:#3ec98e; }
-.wa-sub { font-size:0.7rem; color:var(--dim); margin-top:1px; }
-.wa-bubble {
-  background:#0d2015; border-radius:0 14px 14px 14px;
-  padding:14px 16px; font-size:0.8rem; line-height:1.7;
-  color:#b8e8cc; white-space:pre-wrap; margin-bottom:14px;
-  border:1px solid rgba(62,201,142,0.1);
-  min-height:80px;
-}
-.wa-btn {
-  width:100%; padding:12px;
-  background:linear-gradient(135deg,#25d366,#1aa84d);
-  color:#fff; border:none; border-radius:12px;
-  font-family:inherit; font-size:0.88rem; font-weight:700;
-  cursor:pointer; letter-spacing:0.02em;
-  display:flex; align-items:center; justify-content:center; gap:8px;
-}
-
-/* ── REMINDER ITEMS ── */
-.rem-item {
-  background:var(--s1); border:1px solid var(--border);
-  border-radius:14px; padding:14px 16px;
-  display:flex; align-items:center; gap:14px;
-  margin-bottom:8px;
-}
-.rem-ico { font-size:1.4rem; width:38px; text-align:center; }
-.rem-body { flex:1; }
-.rem-title { font-size:0.88rem; font-weight:500; }
-.rem-time { font-size:0.7rem; color:var(--dim); margin-top:2px; }
-.rem-badge {
-  font-size:0.65rem; padding:3px 8px; border-radius:6px; font-weight:600;
-  background:rgba(201,150,42,0.12); color:var(--gold-lt);
-}
-
-/* ── EMPTY ── */
-.empty { text-align:center; padding:48px 20px; }
-.empty-ico { font-size:3rem; margin-bottom:12px; opacity:0.4; }
-.empty-txt { font-size:0.82rem; color:var(--dim); line-height:1.6; }
-
-/* ── BOTTOM NAV ── */
-.bnav {
-  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:430px;
-  background:rgba(8,11,18,0.92);
-  backdrop-filter:blur(24px);
-  border-top:1px solid var(--border);
-  display:flex; z-index:200;
-  padding:8px 0 20px;
-}
-.bni {
-  flex:1; display:flex; flex-direction:column; align-items:center;
-  gap:3px; cursor:pointer; padding:6px 0; position:relative;
-}
-.bni-ico { font-size:1.25rem; transition:transform 0.2s; }
-.bni-lbl { font-size:0.6rem; color:var(--dim); transition:color 0.2s; }
-.bni.active .bni-lbl { color:var(--gold-lt); }
-.bni.active .bni-ico { transform:scale(1.15); }
-.bni.active::after {
-  content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
-  width:20px; height:2px; background:var(--gold); border-radius:2px;
-}
-
-/* Animations */
-@keyframes fadeSlide {
-  from { opacity:0; transform:translateY(12px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.fade-in { animation:fadeSlide 0.35s ease both; }
-.fd1 { animation-delay:0.05s; }
-.fd2 { animation-delay:0.10s; }
-.fd3 { animation-delay:0.15s; }
-.fd4 { animation-delay:0.20s; }
-.fd5 { animation-delay:0.25s; }
-
-@keyframes pulse {
-  0%,100% { opacity:1; } 50% { opacity:0.6; }
-}
-.live-dot {
-  display:inline-block; width:6px; height:6px; border-radius:50%;
-  background:var(--green); margin-right:6px;
-  animation:pulse 2s infinite;
-}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.fade-in{animation:fadeSlide 0.35s ease both;}
+.fd1{animation-delay:0.05s;} .fd2{animation-delay:0.10s;} .fd3{animation-delay:0.15s;}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;animation:pulse 2s infinite;}
 </style>
 </head>
 <body>
-
 <div class="orb orb1"></div>
 <div class="orb orb2"></div>
 <div class="orb orb3"></div>
 
 <div class="app">
-
-  <!-- HEADER -->
   <div class="header">
     <div class="header-top fade-in">
       <div>
         <div class="greeting-name" id="greetName">Good morning,<br>TC.</div>
-        <div class="greeting-sub"><span class="live-dot"></span><span id="greetSub">今日任務已就緒</span></div>
+        <div class="greeting-sub"><span class="live-dot"></span><span id="greetSub">載入中...</span></div>
       </div>
       <div class="clock-badge">
         <div class="clock-time" id="clock">--:--</div>
@@ -356,15 +175,17 @@ body::after {
     </div>
   </div>
 
-  <!-- PROGRESS -->
+  <div class="sync-bar fade-in fd1">
+    <div class="sync-dot" id="syncDot"></div>
+    <span id="syncTxt">連接中...</span>
+  </div>
+
   <div class="progress-strip fade-in fd1">
     <div class="progress-header">
       <span class="progress-label">今日進度</span>
       <span class="progress-pct" id="pct">0%</span>
     </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="pbar" style="width:0%"></div>
-    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="pbar" style="width:0%"></div></div>
     <div class="progress-cats">
       <div class="pcat"><div class="pcat-dot" style="background:var(--blue)"></div>工作</div>
       <div class="pcat"><div class="pcat-dot" style="background:var(--gold)"></div>水果店</div>
@@ -374,7 +195,6 @@ body::after {
     </div>
   </div>
 
-  <!-- TABS -->
   <div class="tabs fade-in fd2">
     <div class="tab active" onclick="go('today')">今日</div>
     <div class="tab" onclick="go('add')">新增任務</div>
@@ -382,36 +202,25 @@ body::after {
     <div class="tab" onclick="go('wa')">WhatsApp</div>
   </div>
 
-  <!-- ══ TODAY ══ -->
+  <!-- TODAY -->
   <div class="section active" id="sec-today">
     <div class="today-hero fade-in fd3">
       <div style="font-size:0.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">TODAY'S OVERVIEW</div>
-      <div style="font-size:1.1rem;font-weight:600;" id="heroMsg">今日冇待辦任務 🎉</div>
+      <div style="font-size:1.1rem;font-weight:600;" id="heroMsg">載入中...</div>
       <div class="today-stats">
-        <div class="tstat">
-          <div class="tstat-num n-blue" id="s-work">0</div>
-          <div class="tstat-lbl">💼 工作</div>
-        </div>
-        <div class="tstat">
-          <div class="tstat-num n-gold" id="s-fruits">0</div>
-          <div class="tstat-lbl">🍊 水果店</div>
-        </div>
-        <div class="tstat">
-          <div class="tstat-num n-green" id="s-done">0</div>
-          <div class="tstat-lbl">✅ 完成</div>
-        </div>
+        <div class="tstat"><div class="tstat-num n-blue" id="s-work">-</div><div class="tstat-lbl">💼 工作</div></div>
+        <div class="tstat"><div class="tstat-num n-gold" id="s-fruits">-</div><div class="tstat-lbl">🍊 水果店</div></div>
+        <div class="tstat"><div class="tstat-num n-green" id="s-done">-</div><div class="tstat-lbl">✅ 完成</div></div>
       </div>
     </div>
-
-    <div id="task-list"></div>
+    <div id="task-list"><div class="loading"><div class="spinner"></div>載入任務中...</div></div>
   </div>
 
-  <!-- ══ ADD ══ -->
+  <!-- ADD -->
   <div class="section" id="sec-add">
     <div class="add-card fade-in">
       <label class="field-label">任務名稱</label>
       <input class="field-input" id="f-title" placeholder="例：回覆 UCL programme director 電郵">
-
       <div class="grid2">
         <div>
           <label class="field-label">類別</label>
@@ -432,7 +241,6 @@ body::after {
           </select>
         </div>
       </div>
-
       <div class="grid2">
         <div>
           <label class="field-label">截止時間</label>
@@ -443,15 +251,13 @@ body::after {
           <input class="field-input" id="f-note" placeholder="可選">
         </div>
       </div>
-
       <button class="submit-btn" onclick="addTask()">＋ 加入今日任務</button>
     </div>
   </div>
 
-  <!-- ══ SCHEDULE ══ -->
+  <!-- SCHEDULE -->
   <div class="section" id="sec-schedule">
     <div id="sched-list" class="fade-in"></div>
-
     <div class="add-card" style="margin-top:4px">
       <label class="field-label">⛪ 我嘅教會時間表</label>
       <input class="field-input" id="church-inp" placeholder="例：週日 10:30am 主日崇拜，Sutton">
@@ -460,88 +266,49 @@ body::after {
     </div>
   </div>
 
-  <!-- ══ WHATSAPP ══ -->
+  <!-- WHATSAPP -->
   <div class="section" id="sec-wa">
     <div class="wa-outer fade-in">
       <div class="wa-head">
         <div class="wa-ico">💬</div>
-        <div>
-          <div class="wa-ttl">WhatsApp 每日提醒</div>
-          <div class="wa-sub">生成任務摘要，發俾自己</div>
-        </div>
+        <div><div class="wa-ttl">WhatsApp 每日提醒</div><div class="wa-sub">生成任務摘要，發俾自己</div></div>
       </div>
       <div class="wa-bubble" id="wa-txt">撳下面「生成」即睇今日摘要</div>
-      <button class="wa-btn" onclick="genWA()">
-        <span>📋</span><span>生成並複製提醒訊息</span>
-      </button>
+      <button class="wa-btn" onclick="genWA()"><span>📋</span><span>生成並複製提醒訊息</span></button>
     </div>
-
     <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);margin-bottom:10px;font-weight:600;">固定提醒</div>
-    <div class="rem-item fade-in fd1">
-      <div class="rem-ico">🍊</div>
-      <div class="rem-body">
-        <div class="rem-title">JP Fruits 截單</div>
-        <div class="rem-time">每週二 下午 1:00</div>
-      </div>
-      <div class="rem-badge">週二</div>
-    </div>
-    <div class="rem-item fade-in fd2">
-      <div class="rem-ico">🚚</div>
-      <div class="rem-body">
-        <div class="rem-title">JP Fruits 送貨日</div>
-        <div class="rem-time">每週五</div>
-      </div>
-      <div class="rem-badge">週五</div>
-    </div>
-    <div class="rem-item fade-in fd3">
-      <div class="rem-ico">🏋️</div>
-      <div class="rem-body">
-        <div class="rem-title">健身時間</div>
-        <div class="rem-time">每週一次（注意健康！）</div>
-      </div>
-      <div class="rem-badge">週次</div>
-    </div>
-    <div class="rem-item fade-in fd4">
-      <div class="rem-ico">📚</div>
-      <div class="rem-body">
-        <div class="rem-title">Mingtak 中文學校</div>
-        <div class="rem-time">每週六上午（至9月）</div>
-      </div>
-      <div class="rem-badge">週六</div>
-    </div>
-  </div>
-
-</div><!-- /app -->
-
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <div class="bni active" id="nav-today" onclick="go('today')">
-    <div class="bni-ico">☀️</div>
-    <div class="bni-lbl">今日</div>
-  </div>
-  <div class="bni" id="nav-add" onclick="go('add')">
-    <div class="bni-ico">＋</div>
-    <div class="bni-lbl">新增</div>
-  </div>
-  <div class="bni" id="nav-schedule" onclick="go('schedule')">
-    <div class="bni-ico">📅</div>
-    <div class="bni-lbl">日程</div>
-  </div>
-  <div class="bni" id="nav-wa" onclick="go('wa')">
-    <div class="bni-ico">💬</div>
-    <div class="bni-lbl">提醒</div>
+    <div class="rem-item"><div class="rem-ico">🍊</div><div class="rem-body"><div class="rem-title">JP Fruits 截單</div><div class="rem-time">每週二 下午 1:00</div></div><div class="rem-badge">週二</div></div>
+    <div class="rem-item"><div class="rem-ico">🚚</div><div class="rem-body"><div class="rem-title">JP Fruits 送貨日</div><div class="rem-time">每週五</div></div><div class="rem-badge">週五</div></div>
+    <div class="rem-item"><div class="rem-ico">🏋️</div><div class="rem-body"><div class="rem-title">健身時間</div><div class="rem-time">每週一次（注意健康！）</div></div><div class="rem-badge">週次</div></div>
+    <div class="rem-item"><div class="rem-ico">📚</div><div class="rem-body"><div class="rem-title">Mingtak 中文學校</div><div class="rem-time">每週六上午（至9月）</div></div><div class="rem-badge">週六</div></div>
   </div>
 </div>
 
-<script>
-// ── STORAGE ─────────────────────────────────────
-const STORE_KEY = 'tc_tasks_v2';
-const CHURCH_KEY = 'tc_church';
+<div class="bnav">
+  <div class="bni active" id="nav-today" onclick="go('today')"><div class="bni-ico">☀️</div><div class="bni-lbl">今日</div></div>
+  <div class="bni" id="nav-add" onclick="go('add')"><div class="bni-ico">＋</div><div class="bni-lbl">新增</div></div>
+  <div class="bni" id="nav-schedule" onclick="go('schedule')"><div class="bni-ico">📅</div><div class="bni-lbl">日程</div></div>
+  <div class="bni" id="nav-wa" onclick="go('wa')"><div class="bni-ico">💬</div><div class="bni-lbl">提醒</div></div>
+</div>
 
-function load(){ return JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }
-function save(t){ localStorage.setItem(STORE_KEY,JSON.stringify(t)); }
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-// ── CLOCK ────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCueRpUYBy1Z4QStQrTJEkZ2dBWMao9xG8",
+  authDomain: "tc-assistant-3e448.firebaseapp.com",
+  projectId: "tc-assistant-3e448",
+  storageBucket: "tc-assistant-3e448.firebasestorage.app",
+  messagingSenderId: "976228997015",
+  appId: "1:976228997015:web:6ad2beb5593d22d3ac16d2"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ── CLOCK ──
 function updateClock(){
   const n = new Date();
   const hh = String(n.getHours()).padStart(2,'0');
@@ -550,75 +317,73 @@ function updateClock(){
   const days = ['日','一','二','三','四','五','六'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   document.getElementById('clockDate').textContent = `${n.getDate()} ${months[n.getMonth()]} · 週${days[n.getDay()]}`;
-
-  // Greeting
   const h = n.getHours();
-  let gn;
-  if(h<12) gn='Good morning,<br>TC.';
-  else if(h<18) gn='Good afternoon,<br>TC.';
-  else gn='Good evening,<br>TC.';
-  document.getElementById('greetName').innerHTML = gn;
+  document.getElementById('greetName').innerHTML = h<12?'Good morning,<br>TC.':h<18?'Good afternoon,<br>TC.':'Good evening,<br>TC.';
 }
 updateClock();
-setInterval(updateClock, 30000);
+setInterval(updateClock,30000);
 
-// ── DATA ─────────────────────────────────────────
+// ── SYNC STATUS ──
+function setSyncStatus(status){
+  const dot = document.getElementById('syncDot');
+  const txt = document.getElementById('syncTxt');
+  dot.className = 'sync-dot ' + status;
+  txt.textContent = status==='online'?'☁️ 雲端同步已連接':status==='syncing'?'同步中...':'離線模式';
+}
+
+// ── HELPERS ──
 const catCfg = {
-  work:   { icon:'💼', label:'UCL 工作',  color:'var(--blue)'   },
-  fruits: { icon:'🍊', label:'JP Fruits', color:'var(--gold)'   },
-  family: { icon:'👨‍👩‍👧‍👦', label:'家庭',     color:'var(--green)'  },
-  church: { icon:'⛪', label:'教會',      color:'var(--purple)' },
-  health: { icon:'🏋️', label:'健康',      color:'var(--red)'    },
+  work:{icon:'💼',label:'UCL 工作'},
+  fruits:{icon:'🍊',label:'JP Fruits'},
+  family:{icon:'👨‍👩‍👧‍👦',label:'家庭'},
+  church:{icon:'⛪',label:'教會'},
+  health:{icon:'🏋️',label:'健康'},
 };
-
 const priCfg = {
-  high: { dot:'pri-high', label:'緊急' },
-  med:  { dot:'pri-med',  label:'一般' },
-  low:  { dot:'pri-low',  label:'低'   },
+  high:{dot:'pri-high',label:'緊急'},
+  med:{dot:'pri-med',label:'一般'},
+  low:{dot:'pri-low',label:'低'},
 };
 
-// ── TODAY DATE KEY ────────────────────────────────
 function todayKey(){
   const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Filter tasks to today only
-function todayTasks(){
-  return load().filter(t => t.date === todayKey());
+// ── LOAD TASKS ──
+let tasks = [];
+
+async function loadTasks(){
+  try {
+    setSyncStatus('syncing');
+    const q = query(collection(db,'tasks'), where('date','==',todayKey()));
+    const snap = await getDocs(q);
+    tasks = snap.docs.map(d=>({id:d.id,...d.data()}));
+    setSyncStatus('online');
+    renderToday();
+  } catch(e){
+    setSyncStatus('');
+    document.getElementById('task-list').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">無法連接雲端<br>${e.message}</div></div>`;
+  }
 }
 
-// ── RENDER TODAY ─────────────────────────────────
+// ── RENDER ──
 function renderToday(){
-  const tasks = todayTasks();
   const pending = tasks.filter(t=>!t.done);
   const done    = tasks.filter(t=>t.done);
   const total   = tasks.length;
-  const pct     = total ? Math.round((done.length/total)*100) : 0;
+  const pct     = total?Math.round((done.length/total)*100):0;
 
-  // Stats
   document.getElementById('s-work').textContent   = tasks.filter(t=>t.cat==='work'&&!t.done).length;
   document.getElementById('s-fruits').textContent = tasks.filter(t=>t.cat==='fruits'&&!t.done).length;
   document.getElementById('s-done').textContent   = done.length;
   document.getElementById('pct').textContent      = pct+'%';
   document.getElementById('pbar').style.width     = pct+'%';
-  document.getElementById('taskCount') && (document.getElementById('taskCount').textContent = pending.length);
+  document.getElementById('greetSub').textContent = pending.length?`今日尚有 ${pending.length} 個任務待辦`:'今日所有任務完成喇！🎉';
 
-  // Hero msg
-  const heroMsgs = [
-    '你得㗎，TC！繼續加油！💪',
-    '一步一步嚟，冇問題嘅 TC！',
-    'Focus，TC！今日搞掂佢！🔥',
-    '繁忙但有條理，係你嘅風格！',
-  ];
-  document.getElementById('heroMsg').textContent = pending.length
-    ? heroMsgs[Math.floor(Math.random()*heroMsgs.length)]
-    : '今日任務全部完成！🎉';
+  const msgs = ['你得㗎，TC！繼續加油！💪','Focus，TC！今日搞掂佢！🔥','繁忙但有條理，係你嘅風格！','一步一步嚟，冇問題嘅！'];
+  document.getElementById('heroMsg').textContent = pending.length ? msgs[Math.floor(Math.random()*msgs.length)] : '今日任務全部完成！🎉';
 
-  document.getElementById('greetSub').textContent =
-    pending.length ? `今日尚有 ${pending.length} 個任務待辦` : '今日所有任務完成喇！';
-
-  // Task list
   const el = document.getElementById('task-list');
   if(!tasks.length){
     el.innerHTML=`<div class="empty"><div class="empty-ico">📝</div><div class="empty-txt">今日未有任務<br>撳「新增任務」開始規劃你嘅一天</div></div>`;
@@ -627,178 +392,162 @@ function renderToday(){
 
   const renderGroup = (arr, label) => {
     if(!arr.length) return '';
-    return `<div class="task-group-label">${label}</div>`+
-      arr.map(t=>{
-        const cc = catCfg[t.cat]||catCfg.work;
-        const pc = priCfg[t.priority]||priCfg.med;
-        return `<div class="task-item cat-${t.cat} ${t.done?'done':''}" onclick="toggle(${t.id})">
-          <div class="task-check">${t.done?'✓':''}</div>
-          <div class="task-content">
-            <div class="task-title">${t.title}</div>
-            <div class="task-meta">
-              <span class="task-cat">${cc.icon} ${cc.label}</span>
-              ${t.time?`<span class="task-time">⏰ ${t.time}</span>`:''}
-              ${t.note?`<span style="font-size:0.65rem;color:var(--dim)">· ${t.note}</span>`:''}
-            </div>
+    return `<div class="task-group-label">${label}</div>`+arr.map(t=>{
+      const cc = catCfg[t.cat]||catCfg.work;
+      const pc = priCfg[t.priority]||priCfg.med;
+      return `<div class="task-item cat-${t.cat} ${t.done?'done':''}" onclick="toggleTask('${t.id}',${t.done})">
+        <div class="task-check">${t.done?'✓':''}</div>
+        <div class="task-content">
+          <div class="task-title">${t.title}</div>
+          <div class="task-meta">
+            <span class="task-cat">${cc.icon} ${cc.label}</span>
+            ${t.time?`<span class="task-time">⏰ ${t.time}</span>`:''}
+            ${t.note?`<span style="font-size:0.65rem;color:var(--dim)">· ${t.note}</span>`:''}
           </div>
-          <div class="task-pri ${pc.dot}"></div>
-        </div>`;
-      }).join('');
+        </div>
+        <div class="task-pri ${pc.dot}"></div>
+        <button class="del-task" onclick="event.stopPropagation();deleteTask('${t.id}')">✕</button>
+      </div>`;
+    }).join('');
   };
 
   el.innerHTML = renderGroup(pending,'待辦') + renderGroup(done,'已完成');
 }
 
-function toggle(id){
-  const tasks = load();
-  const t = tasks.find(x=>x.id===id);
-  if(t){ t.done=!t.done; save(tasks); renderToday(); }
-}
-
-function addTask(){
+// ── ADD ──
+window.addTask = async function(){
   const title = document.getElementById('f-title').value.trim();
   if(!title){ document.getElementById('f-title').focus(); return; }
-  const tasks = load();
-  tasks.unshift({
-    id: Date.now(),
-    title,
-    cat: document.getElementById('f-cat').value,
-    priority: document.getElementById('f-pri').value,
-    time: document.getElementById('f-time').value,
-    note: document.getElementById('f-note').value.trim(),
-    done: false,
-    date: todayKey(),
-  });
-  save(tasks);
-  document.getElementById('f-title').value='';
-  document.getElementById('f-note').value='';
-  document.getElementById('f-time').value='';
-  renderToday();
-  go('today');
-}
+  setSyncStatus('syncing');
+  try {
+    const newTask = {
+      title,
+      cat: document.getElementById('f-cat').value,
+      priority: document.getElementById('f-pri').value,
+      time: document.getElementById('f-time').value,
+      note: document.getElementById('f-note').value.trim(),
+      done: false,
+      date: todayKey(),
+      created: new Date().toISOString(),
+    };
+    const ref = await addDoc(collection(db,'tasks'), newTask);
+    tasks.unshift({id:ref.id,...newTask});
+    document.getElementById('f-title').value='';
+    document.getElementById('f-note').value='';
+    document.getElementById('f-time').value='';
+    setSyncStatus('online');
+    renderToday();
+    go('today');
+    showToast('✅ 任務已加入並同步！');
+  } catch(e){ setSyncStatus(''); showToast('⚠️ 同步失敗：'+e.message); }
+};
 
-// ── SCHEDULE ─────────────────────────────────────
+// ── TOGGLE ──
+window.toggleTask = async function(id, done){
+  setSyncStatus('syncing');
+  try {
+    await updateDoc(doc(db,'tasks',id),{done:!done});
+    const t = tasks.find(x=>x.id===id);
+    if(t) t.done = !done;
+    setSyncStatus('online');
+    renderToday();
+  } catch(e){ setSyncStatus(''); showToast('⚠️ 同步失敗'); }
+};
+
+// ── DELETE ──
+window.deleteTask = async function(id){
+  if(!confirm('確定刪除呢個任務？')) return;
+  setSyncStatus('syncing');
+  try {
+    await deleteDoc(doc(db,'tasks',id));
+    tasks = tasks.filter(x=>x.id!==id);
+    setSyncStatus('online');
+    renderToday();
+    showToast('🗑️ 任務已刪除');
+  } catch(e){ setSyncStatus(''); showToast('⚠️ 刪除失敗'); }
+};
+
+// ── SCHEDULE ──
 const schedData = [
-  { day:'週一至五', items:[
-    { dot:'var(--blue)',   title:'UCL GBSH 全職工作', note:'Executive Education Administrator (Grade 6)', time:'09:00 – 17:30' },
-  ]},
-  { day:'週二', items:[
-    { dot:'var(--gold)',   title:'JP Fruits 截單截止', note:'提醒客人落單，通知business partner', time:'1:00pm' },
-  ]},
-  { day:'週五', items:[
-    { dot:'var(--gold)',   title:'JP Fruits 送貨日', note:'South London各區送貨', time:'全日' },
-  ]},
-  { day:'週六', items:[
-    { dot:'var(--purple)', title:'Mingtak 中文學校', note:'兼職中文導師（計劃9月辭職）', time:'上午' },
-    { dot:'var(--green)',  title:'家庭時間', note:'帶小朋友外出 ❤️', time:'下午' },
-  ]},
-  { day:'週日', items:[
-    { dot:'#a97ff0',       title:'教會時間', note:'見下方自訂', time:'' },
-    { dot:'var(--green)',  title:'家庭日', note:'珍貴家庭時光', time:'' },
-  ]},
+  {day:'週一至五',items:[{dot:'var(--blue)',title:'UCL GBSH 全職工作',note:'Executive Education Administrator (Grade 6)',time:'09:00–17:30'}]},
+  {day:'週二',items:[{dot:'var(--gold)',title:'JP Fruits 截單截止',note:'提醒客人落單，通知business partner',time:'1:00pm'}]},
+  {day:'週五',items:[{dot:'var(--gold)',title:'JP Fruits 送貨日',note:'South London各區送貨',time:'全日'}]},
+  {day:'週六',items:[{dot:'var(--purple)',title:'Mingtak 中文學校',note:'兼職中文導師（計劃9月辭職）',time:'上午'},{dot:'var(--green)',title:'家庭時間',note:'帶小朋友外出 ❤️',time:'下午'}]},
+  {day:'週日',items:[{dot:'#a97ff0',title:'教會時間',note:'見下方自訂',time:''},{dot:'var(--green)',title:'家庭日',note:'珍貴家庭時光',time:''}]},
 ];
 
 function renderSchedule(){
-  const el = document.getElementById('sched-list');
-  el.innerHTML = schedData.map(d=>`
+  document.getElementById('sched-list').innerHTML = schedData.map(d=>`
     <div class="week-day fade-in">
-      <div class="wd-header">
-        <div class="wd-day">${d.day}</div>
-        <div class="wd-line"></div>
-      </div>
-      ${d.items.map(i=>`
-        <div class="wd-item">
-          <div class="wd-dot" style="background:${i.dot}"></div>
-          <div class="wd-info">
-            <div class="wd-title">${i.title}</div>
-            <div class="wd-note">${i.note}</div>
-          </div>
-          ${i.time?`<div class="wd-time">${i.time}</div>`:''}
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-
-  const church = localStorage.getItem(CHURCH_KEY)||'';
-  document.getElementById('church-out').textContent = church ? `⛪ 已儲存：${church}` : '';
+      <div class="wd-header"><div class="wd-day">${d.day}</div><div class="wd-line"></div></div>
+      ${d.items.map(i=>`<div class="wd-item">
+        <div class="wd-dot" style="background:${i.dot}"></div>
+        <div class="wd-info"><div class="wd-title">${i.title}</div><div class="wd-note">${i.note}</div></div>
+        ${i.time?`<div class="wd-time">${i.time}</div>`:''}
+      </div>`).join('')}
+    </div>`).join('');
+  const church = localStorage.getItem('tc_church')||'';
+  document.getElementById('church-out').textContent = church?`⛪ 已儲存：${church}`:'';
   if(church) document.getElementById('church-inp').value = church;
 }
 
-function saveChurch(){
+window.saveChurch = function(){
   const v = document.getElementById('church-inp').value.trim();
   if(!v) return;
-  localStorage.setItem(CHURCH_KEY, v);
+  localStorage.setItem('tc_church',v);
   document.getElementById('church-out').textContent = `⛪ 已儲存：${v}`;
-}
+  showToast('⛪ 教會時間已儲存！');
+};
 
-// ── WHATSAPP ─────────────────────────────────────
-function genWA(){
-  const tasks = todayTasks().filter(t=>!t.done);
+// ── WHATSAPP ──
+window.genWA = function(){
+  const pending = tasks.filter(t=>!t.done);
   const n = new Date();
   const days = ['日','一','二','三','四','五','六'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  let msg = `☀️ TC 今日任務 (${n.getDate()} ${months[n.getMonth()]} · 週${days[n.getDay()]})\n`;
-  msg += `${'─'.repeat(26)}\n`;
-
-  if(!tasks.length){
-    msg += `\n🎉 今日所有任務完成喇！\n好好休息，TC！`;
+  let msg = `☀️ TC 今日任務 (${n.getDate()} ${months[n.getMonth()]} · 週${days[n.getDay()]})\n${'─'.repeat(26)}\n`;
+  if(!pending.length){
+    msg += `\n🎉 今日所有任務完成！好好休息，TC！`;
   } else {
-    const order = ['work','fruits','family','church','health'];
-    order.forEach(c=>{
-      const g = tasks.filter(t=>t.cat===c);
+    ['work','fruits','family','church','health'].forEach(c=>{
+      const g = pending.filter(t=>t.cat===c);
       if(!g.length) return;
       const cc = catCfg[c];
       msg += `\n${cc.icon} ${cc.label}\n`;
       g.forEach(t=>{
         const p = t.priority==='high'?'🔴':t.priority==='med'?'🟡':'🟢';
-        msg += `  ${p} ${t.title}`;
-        if(t.time) msg += ` · ${t.time}`;
-        if(t.note) msg += `\n     📎 ${t.note}`;
-        msg += '\n';
+        msg += `  ${p} ${t.title}${t.time?' · '+t.time:''}${t.note?'\n     📎 '+t.note:''}\n`;
       });
     });
-    msg += `\n${'─'.repeat(26)}\n`;
-    msg += `共 ${tasks.length} 個任務 · 加油 TC！💪`;
+    msg += `\n${'─'.repeat(26)}\n共 ${pending.length} 個任務 · 加油 TC！💪`;
   }
-
   document.getElementById('wa-txt').textContent = msg;
-  navigator.clipboard.writeText(msg)
-    .then(()=>{ showToast('✅ 已複製！去 WhatsApp 貼上發俾自己'); })
-    .catch(()=>{ showToast('請手動複製上方訊息'); });
-}
+  navigator.clipboard.writeText(msg).then(()=>showToast('✅ 已複製！去 WhatsApp 貼上')).catch(()=>showToast('請手動複製上方訊息'));
+};
 
-// ── TOAST ────────────────────────────────────────
+// ── TOAST ──
 function showToast(msg){
   const t = document.createElement('div');
-  t.style.cssText = `
-    position:fixed; bottom:100px; left:50%; transform:translateX(-50%);
-    background:#1a2a1a; border:1px solid rgba(62,201,142,0.3);
-    color:#3ec98e; padding:10px 20px; border-radius:10px;
-    font-size:0.8rem; z-index:9998; white-space:nowrap;
-    animation:fadeSlide 0.3s ease;
-  `;
+  t.style.cssText = `position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#1a2a1a;border:1px solid rgba(62,201,142,0.3);color:#3ec98e;padding:10px 20px;border-radius:10px;font-size:0.8rem;z-index:9998;white-space:nowrap;animation:fadeSlide 0.3s ease;`;
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(()=>t.remove(), 3000);
+  setTimeout(()=>t.remove(),3000);
 }
 
-// ── NAV ──────────────────────────────────────────
+// ── NAV ──
 const sections = ['today','add','schedule','wa'];
-function go(name){
+window.go = function(name){
   sections.forEach(s=>{
-    document.getElementById('sec-'+s).classList.toggle('active', s===name);
-    document.getElementById('nav-'+s).classList.toggle('active', s===name);
+    document.getElementById('sec-'+s).classList.toggle('active',s===name);
+    document.getElementById('nav-'+s).classList.toggle('active',s===name);
   });
-  document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active', sections[i]===name);
-  });
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',sections[i]===name));
   if(name==='today') renderToday();
   if(name==='schedule') renderSchedule();
-}
+};
 
-// ── INIT ─────────────────────────────────────────
-renderToday();
+// ── INIT ──
+loadTasks();
 renderSchedule();
 </script>
 </body>
