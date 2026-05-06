@@ -200,6 +200,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
     <div class="tab" onclick="go('add')">新增任務</div>
     <div class="tab" onclick="go('schedule')">固定日程</div>
     <div class="tab" onclick="go('wa')">WhatsApp</div>
+    <div class="tab" onclick="go('settings')">⚙️ 設定</div>
   </div>
 
   <!-- TODAY -->
@@ -311,6 +312,39 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
     <div class="rem-item"><div class="rem-ico">🏋️</div><div class="rem-body"><div class="rem-title">健身時間</div><div class="rem-time">每週一次（注意健康！）</div></div><div class="rem-badge">週次</div></div>
     <div class="rem-item"><div class="rem-ico">📚</div><div class="rem-body"><div class="rem-title">Mingtak 中文學校</div><div class="rem-time">每週六上午（至9月）</div></div><div class="rem-badge">週六</div></div>
   </div>
+  <!-- SETTINGS -->
+  <div class="section" id="sec-settings">
+    <div class="add-card fade-in" style="border-color:rgba(169,127,240,0.2);">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+        <div style="width:36px;height:36px;background:rgba(169,127,240,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">⚙️</div>
+        <div>
+          <div style="font-size:0.95rem;font-weight:600;color:var(--purple)">API 設定</div>
+          <div style="font-size:0.7rem;color:var(--dim)">你嘅Key只儲喺本地，唔會上傳</div>
+        </div>
+      </div>
+
+      <label class="field-label">🤖 Gemini API Key</label>
+      <div style="position:relative;margin-bottom:12px;">
+        <input class="field-input" id="gemini-key-input" type="password" placeholder="貼上你嘅 Gemini API Key" style="margin-bottom:0;padding-right:50px;">
+        <button onclick="toggleKeyVisibility()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--dim);cursor:pointer;font-size:0.8rem;" id="eye-btn">👁️</button>
+      </div>
+      <div id="key-status" style="font-size:0.72rem;margin-bottom:14px;"></div>
+      <button class="submit-btn" onclick="saveApiKey()" style="background:linear-gradient(135deg,var(--purple),#7040c0);">💾 儲存 API Key</button>
+      <button class="submit-btn" onclick="clearApiKey()" style="background:rgba(255,95,95,0.15);color:var(--red);border:1px solid rgba(255,95,95,0.2);margin-top:8px;">🗑️ 清除 API Key</button>
+    </div>
+
+    <div class="add-card fade-in fd1" style="margin-top:4px;">
+      <div style="font-size:0.85rem;font-weight:600;margin-bottom:10px;">📖 點樣攞 Gemini API Key？</div>
+      <div style="font-size:0.78rem;color:var(--dim);line-height:1.8;">
+        1. 去 <span style="color:var(--blue)">aistudio.google.com/apikey</span><br>
+        2. 撳「建立 API 金鑰」<br>
+        3. 選擇 <span style="color:var(--gold)">tc-assistant-3e448</span> 專案<br>
+        4. 複製key，貼入上面<br>
+        5. 撳「儲存」
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="bnav">
@@ -318,6 +352,7 @@ body::after{content:'';position:fixed;inset:0;background-image:url("data:image/s
   <div class="bni" id="nav-add" onclick="go('add')"><div class="bni-ico">＋</div><div class="bni-lbl">新增</div></div>
   <div class="bni" id="nav-schedule" onclick="go('schedule')"><div class="bni-ico">📅</div><div class="bni-lbl">日程</div></div>
   <div class="bni" id="nav-wa" onclick="go('wa')"><div class="bni-ico">💬</div><div class="bni-lbl">提醒</div></div>
+  <div class="bni" id="nav-settings" onclick="go('settings')"><div class="bni-ico">⚙️</div><div class="bni-lbl">設定</div></div>
 </div>
 
 <!-- Firebase -->
@@ -564,7 +599,7 @@ function showToast(msg){
 }
 
 // ── NAV ──
-const sections = ['today','add','schedule','wa'];
+const sections = ['today','add','schedule','wa','settings'];
 window.go = function(name){
   sections.forEach(s=>{
     document.getElementById('sec-'+s).classList.toggle('active',s===name);
@@ -576,10 +611,12 @@ window.go = function(name){
 };
 
 // ── GEMINI AI EXTRACT ──
-const GEMINI_KEY = 'AIzaSyA_L3SMs6wE2aTDxWIlKFrkvG3uESIXIqw';
+let GEMINI_KEY = localStorage.getItem('tc_gemini_key') || '';
 let aiTasksBuffer = [];
 
 window.aiExtract = async function(){
+  GEMINI_KEY = localStorage.getItem('tc_gemini_key') || '';
+  if(!GEMINI_KEY){ showToast('⚠️ 請先喺「設定」入面輸入API Key！'); go('settings'); return; }
   const text = document.getElementById('ai-input').value.trim();
   if(!text){ showToast('請先貼上電郵內容！'); return; }
 
@@ -667,9 +704,46 @@ window.confirmAiTasks = async function(){
   }
 };
 
+// ── API KEY SETTINGS ──
+function loadKeyStatus(){
+  const key = localStorage.getItem('tc_gemini_key');
+  const status = document.getElementById('key-status');
+  if(!status) return;
+  if(key){
+    status.innerHTML = '<span style="color:var(--green)">✅ API Key 已儲存（'+key.substring(0,8)+'...）</span>';
+    document.getElementById('gemini-key-input').value = key;
+  } else {
+    status.innerHTML = '<span style="color:var(--red)">⚠️ 未設定 API Key，AI功能未能使用</span>';
+  }
+}
+
+window.saveApiKey = function(){
+  const key = document.getElementById('gemini-key-input').value.trim();
+  if(!key){ showToast('請輸入API Key！'); return; }
+  localStorage.setItem('tc_gemini_key', key);
+  GEMINI_KEY = key;
+  loadKeyStatus();
+  showToast('✅ API Key 已安全儲存！');
+};
+
+window.clearApiKey = function(){
+  if(!confirm('確定清除API Key？')) return;
+  localStorage.removeItem('tc_gemini_key');
+  GEMINI_KEY = '';
+  document.getElementById('gemini-key-input').value = '';
+  loadKeyStatus();
+  showToast('🗑️ API Key 已清除');
+};
+
+window.toggleKeyVisibility = function(){
+  const inp = document.getElementById('gemini-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+};
+
 // ── INIT ──
 loadTasks();
 renderSchedule();
+setTimeout(loadKeyStatus, 100);
 </script>
 </body>
 </html>
