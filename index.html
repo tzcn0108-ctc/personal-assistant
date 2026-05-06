@@ -588,28 +588,7 @@ window.aiExtract = async function(){
   btn.disabled = true;
   document.getElementById('ai-result').style.display = 'none';
 
-  const prompt = `你係一個個人助手。請從以下文字中提取所有需要行動的任務。
-用JSON格式回覆，只回覆JSON，唔好其他文字。
-
-格式：
-[
-  {
-    "title": "任務名稱（廣東話，簡潔）",
-    "cat": "work/fruits/family/church/health 其中一個",
-    "priority": "high/med/low 其中一個",
-    "note": "簡短備注（可空白）"
-  }
-]
-
-cat判斷標準：
-- work = UCL、GBSH、會議、電郵、報告、同事
-- fruits = JP Fruits、水果、訂單、送貨
-- family = 家庭、小朋友、太太、學校
-- church = 教會、崇拜
-- health = 健身、醫生、健康
-
-文字內容：
-${text}`;
+  const prompt = `You are a personal assistant for TC (Tszchun Chan), Executive Education Administrator at UCL GBSH. Extract ALL action items TC needs to do from the email below. Look for: questions needing reply, files to upload, dates to confirm, follow-up actions. Return ONLY a raw JSON array, no markdown, no explanation. Format: [{"title":"action in Cantonese max 15 chars","cat":"work","priority":"high or med or low","note":"brief Cantonese context"}]. Priority: high=urgent/people waiting, med=normal, low=nice to have. Cat: work=UCL/GBSH/email, fruits=JP Fruits, family=家庭, church=教會, health=健康. Email: ${text}`;
 
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
